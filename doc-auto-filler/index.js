@@ -31,6 +31,8 @@ app.get('/', (req, res) => {
     res.send("🚀 Node Automation Engine is active on Vercel!");
 });
 
+// commented out for now, as it may not be needed in production
+
 app.post('/generate-doc', upload.none(), async (req, res) => {
     // 1. Instantly respond to Jotform
     res.status(200).send("Webhook received, processing automation pipeline...");
