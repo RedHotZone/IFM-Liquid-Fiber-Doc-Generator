@@ -21,8 +21,8 @@ const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || "https://red-hot-zone.app
 
 // 🎯 Static Form Registry & Config Modules (Ensures clean Vercel bundling)
 const FORM_CONFIGS = {
-    "262012074627046": require('./Forms/manhole_access.js'),
-    "262001795087054": require('./Forms/word_sample.js'),
+    "262012074627046": require('../Forms/manhole_access.js'),
+    "262001795087054": require('../Forms/word_sample.js'),
     // Add future forms here: "FORM_ID": require('./Forms/your_file.js')
 };
 
