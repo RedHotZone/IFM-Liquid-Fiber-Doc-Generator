@@ -9,7 +9,6 @@ const ExcelJS = require('exceljs');
 const multer = require('multer');
 const axios = require('axios');
 const FormData = require('form-data');
-const { templateFile } = require('./Forms/manhole_access');
 
 const app = express();
 const upload = multer();
@@ -18,13 +17,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // n8n production webhook URL
-const N8N_WEBHOOK_URL = "https://red-hot-zone.app.n8n.cloud/webhook/8f803c64-7a6f-4d04-9169-fe28f8367015";
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || "https://red-hot-zone.app.n8n.cloud/webhook/8f803c64-7a6f-4d04-9169-fe28f8367015";
 
-// 🎯 Central Form Registry: Map Form IDs to readable file names
-const FORM_MAP = {
-    "262012074627046": "manhole_access.js",
-    "262001795087054": "word_sample.js",
-    // Add future forms here: "FORM_ID": "file_name.js"
+// 🎯 Static Form Registry & Config Modules (Ensures clean Vercel bundling)
+const FORM_CONFIGS = {
+    "262012074627046": require('./Forms/manhole_access.js'),
+    "262001795087054": require('./Forms/word_sample.js'),
+    // Add future forms here: "FORM_ID": require('./Forms/your_file.js')
 };
 
 app.post('/generate-doc', upload.none(), async (req, res) => {
@@ -35,15 +34,13 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
         const { formID, pretty: prettyString = "" } = req.body || {};
         console.log(`📥 Processing Form ID: ${formID}`);
 
-        // Look up readable file name or fall back to Form ID
-        const configFile = FORM_MAP[formID] || `${formID}.js`;
-        const configPath = path.resolve(__dirname, 'Forms', configFile);
+        // Look up configuration module
+        const formConfig = FORM_CONFIGS[formID];
 
-        if (!fs.existsSync(configPath)) {
-            return console.error(`Error: Form ID ${formID} (${configFile}) has no configuration file.`);
+        if (!formConfig) {
+            return console.error(`Error: Form ID ${formID} has no registered configuration module.`);
         }
 
-        const formConfig = require(configPath);
         const { projectName, submissionDate, templateData } = formConfig.parseFields(prettyString);
         
         // Extract template base name without extension 
@@ -113,7 +110,7 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
         form.append('submissionDate', submissionDate);
         form.append('formID', formID);
 
-        //  3. Fire payload to n8n
+        // 3. Fire payload to n8n
         const response = await axios.post(N8N_WEBHOOK_URL, form, {
             headers: { ...form.getHeaders() }
         });
@@ -125,5 +122,11 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
     }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`Automation Engine running on port ${PORT}`));
+// Dynamic Port Assignment (Supports Vercel & Local Dev)
+const PORT = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => console.log(`Automation Engine running on port ${PORT}`));
+}
+
+module.exports = app;
