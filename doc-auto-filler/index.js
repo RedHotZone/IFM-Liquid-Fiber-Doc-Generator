@@ -26,6 +26,11 @@ const FORM_CONFIGS = {
     // Add future forms here: "FORM_ID": require('./Forms/your_file.js')
 };
 
+// Health check route
+app.get('/', (req, res) => {
+    res.send("🚀 Node Automation Engine is active on Vercel!");
+});
+
 app.post('/generate-doc', upload.none(), async (req, res) => {
     // 1. Instantly respond to Jotform
     res.status(200).send("Webhook received, processing automation pipeline...");

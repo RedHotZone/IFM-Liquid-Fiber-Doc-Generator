@@ -1,21 +1,13 @@
 {
-  "version": 2,
-  "builds": [
+  "rewrites": [
     {
-      "src": "index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "Templates/**",
-          "Forms/**"
-        ]
-      }
+      "source": "/(.*)",
+      "destination": "/index.js"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "index.js"
+  "functions": {
+    "index.js": {
+      "includeFiles": "Templates/**"
     }
-  ]
+  }
 }
