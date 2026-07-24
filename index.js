@@ -17,21 +17,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // n8n production webhook URL
-const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL || "https://red-hot-zone.app.n8n.cloud/webhook/8f803c64-7a6f-4d04-9169-fe28f8367015";
+const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL 
 
-// 🎯 Static Form Registry & Config Modules (Ensures clean Vercel bundling)
+// Static Form Registry & Config Modules
 const FORM_CONFIGS = {
     "262012074627046": require('./Forms/manhole_access.js'),
     "262001795087054": require('./Forms/word_sample.js'),
-    // Add future forms here: "FORM_ID": require('./Forms/your_file.js')
 };
 
 // Health check route
 app.get('/', (req, res) => {
-    res.send("🚀 Node Automation Engine is active on Vercel!");
+    res.send("🚀 Node Automation Engine is active!");
 });
-
-// commented out for now, as it may not be needed in production
 
 app.post('/generate-doc', upload.none(), async (req, res) => {
     // 1. Instantly respond to Jotform
@@ -81,7 +78,6 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
                 const val = templateData[sheetNameOrCell];
 
                 if (typeof val === 'object' && val !== null) {
-                    // Multi-sheet structure: { "Sheet1": { "A1": "Val" } }
                     const worksheet = workbook.getWorksheet(sheetNameOrCell);
 
                     if (!worksheet) {
@@ -95,7 +91,6 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
                         worksheet.getCell(cell).value = val[cell];
                     });
                 } else {
-                    // Single-sheet fallback structure: { "A1": "Val" }
                     const worksheet = workbook.worksheets[0];
                     worksheet.getCell(sheetNameOrCell).value = val;
                 }
@@ -104,7 +99,7 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
             fileBuffer = await workbook.xlsx.writeBuffer();
         }
 
-        // 🚀 2. Bundle Document + Metadata for n8n
+        // 2. Bundle Document + Metadata for n8n
         console.log(` Bundling ${dynamicFilename} and sending to n8n...`);
         const form = new FormData();
         
@@ -129,12 +124,9 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
     }
 });
 
-// Ensure this port declaration is near the top or middle
+// Port configuration for Render
 const PORT = process.env.PORT || 10000;
 
-// ... all your Express routes (app.get, app.post, etc.) go here ...
-
-// ADD THIS AT THE VERY BOTTOM OF index.js:
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Server running on port ${PORT}`);
 });
