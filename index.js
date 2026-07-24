@@ -82,6 +82,13 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
                 if (typeof val === 'object' && val !== null) {
                     const worksheet = workbook.getWorksheet(sheetNameOrCell);
 
+                    worksheet.pageSetup = {
+                        orientation: 'portrait',
+                        fitToPage: true,
+                        fitToWidth: 1,
+                        fitToHeight: 1
+                    }
+                    
                     if (!worksheet) {
                         console.warn(`Warning: Worksheet "${sheetNameOrCell}" not found in template. Skipping.`);
                         return;
