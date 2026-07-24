@@ -129,11 +129,12 @@ app.post('/generate-doc', upload.none(), async (req, res) => {
     }
 });
 
-// Dynamic Port Assignment (Supports Vercel & Local Dev)
-const PORT = process.env.PORT || 3000;
+// Ensure this port declaration is near the top or middle
+const PORT = process.env.PORT || 10000;
 
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`Automation Engine running on port ${PORT}`));
-}
+// ... all your Express routes (app.get, app.post, etc.) go here ...
 
-module.exports = app;
+// ADD THIS AT THE VERY BOTTOM OF index.js:
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
